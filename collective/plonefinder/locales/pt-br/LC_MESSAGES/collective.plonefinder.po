@@ -1,0 +1,127 @@
+# Translation of collective.plonefinder.pot to Portugues
+msgid ""
+msgstr ""
+"Project-Id-Version: collective.plonefinder\n"
+"POT-Creation-Date: 2010-10-30 11:30+0200\n"
+"PO-Revision-Date: 2010-10-30 11:30+0200\n"
+"Last-Translator: Vindula\n"
+"Language-Team: \n"
+"Language-Code: pt-br\n"
+"Language-Name: Portugues\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+"Preferred-Encodings: utf-8 latin1\n"
+"X-Is-Fallback-For: pt\n"
+"Domain: collective.plonefinder\n"
+
+#. Default: "Browse"
+msgid "Browse"
+msgstr "Buscar"
+
+#. Default: "Choose your files : "
+msgid "label_choose_your_files"
+msgstr "Escolha seus arquivos: "
+
+#. Default: "Upload Files"
+msgid "label_upload_files"
+msgstr "Upload de arquivos"
+
+#. Default: "Clear Queue"
+msgid "label_clear_queue"
+msgstr "Limpar Fila"
+
+#. Default: "All files uploaded with success."
+msgid "All files uploaded with success."
+msgstr "Todos os arquivos foram enviados com sucesso"
+
+#. Default: " files uploaded with success, "
+msgid " files uploaded with success, "
+msgstr " arquivos enviados com sucesso, "
+
+#. Default: " uploads return an error."
+msgid " uploads return an error."
+msgstr " envio retornou um erro."
+
+#. Default: "Choose files to upload"
+msgid "Choose files to upload"
+msgstr "Escolher arquivos para upload"
+
+#. Default: "Choose images to upload"
+msgid "Choose images to upload"
+msgstr "Escolher imagens para upload"
+
+#. Default: "Choose video files to upload"
+msgid "Choose video files to upload"
+msgstr "Escolher arquivos de videos para upload"
+
+#. Default: "Choose audio files to upload"
+msgid "Choose audio files to upload"
+msgstr "escolher arquivos de audio para upload"
+
+#. Default: "Files Quick Upload"
+msgid "header_file_quick_upload"
+msgstr "Quick Upload"
+
+#. Default: "Create a new folder"
+msgid "header_create_new_folder"
+msgstr "Criar nova pasta"
+
+#. Default: "Files quick upload"
+msgid "label_files_quick__upload"
+msgstr "Quick Upload"
+
+#. Default: "Create new folder"
+msgid "label_create_new_folder"
+msgstr "Criar nova pasta"
+
+#. Default: "Close window"
+msgid "label_close_window"
+msgstr "Fechar Janela"
+
+#. Default: "Maximize window"
+msgid "label_maximize_window"
+msgstr "Maximizar janela"
+
+#. Default: "All site"
+msgid "label_all_site"
+msgstr "Todo o site"
+
+#. Default: "This folder only"
+msgid "label_this_folder_only"
+msgstr "Somente nesta pasta"
+
+#. Default: "Photo album view"
+msgid "label_photo_album_view"
+msgstr "Visão de album"
+
+#. Default: "File listing view"
+msgid "label_file_listing_view"
+msgstr "Visão de lista"
+
+#. Default: "Choose page's results number :"
+msgid "label_choose_results_number"
+msgstr "Escolha o número  de resultados por página:"
+
+#. Default: "next page"
+msgid "label_next_page"
+msgstr "próxima página"
+
+#. Default: "previous page"
+msgid "label_previous_page"
+msgstr "página anterior"
+
+#. Default: "Loading please wait..."
+msgid "label_msg_loading"
+msgstr "Carregando, por favor espere..."
+
+#. Default: "Done."
+msgid "label_msg_done"
+msgstr "Pronto."
+
+#. Default: "Go to parent"
+msgid "label_goto_parent"
+msgstr "Ir para nivel suberior"
+
+
