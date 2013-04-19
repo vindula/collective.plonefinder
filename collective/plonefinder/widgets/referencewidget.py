@@ -9,7 +9,7 @@ try:
     from zope.browserpage.viewpagetemplatefile import ViewPageTemplateFile
     from zope.component.hooks import getSite
     from zope.formlib.widgets.OrderedMultiSelectWidget
-except:
+except:# < Plone 4.3
     from zope.app.pagetemplate.viewpagetemplatefile import ViewPageTemplateFile
     from zope.app.component.hooks import getSite
     from zope.app.form.browser import OrderedMultiSelectWidget
