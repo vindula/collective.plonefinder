@@ -207,16 +207,28 @@ function getQueryObject(query) {
     return new Array(Params, ParamsList);
 }
 
+function clone(obj) {
+    if (null == obj || "object" != typeof obj) return obj;
+    var copy = obj.constructor();
+    for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
+    }
+    return copy;
+}
+
 compileData = function(dataname, data, formData) {
 
     if (formData) {
         if (!isInString(dataname, formData)) {
-            formData = formData + '&' + dataname + '=' + encodeURI(data);
+        	if (dataname != 'SearchableText')
+        		data = encodeURI(data)
+            formData = formData + '&' + dataname + '=' + data;
         }
         else if (data) {
             paramsObj = getQueryObject(formData);
             params = paramsObj[0];
-            params[dataname]= encodeURI(data);
+            params_old = clone(params);
+            params[dataname] = encodeURI(data);
             paramsList = paramsObj[1];
             formData = '';
             for ( var i = 0; i < paramsList.length; i++ ) {
@@ -225,7 +237,9 @@ compileData = function(dataname, data, formData) {
                     if (formData) {
                         formData = formData + '&';
                     }
-                    formData = formData + paramsList[i] + '=' +  encodeURI(value);
+                    if (params_old[paramsList[i]] != value && paramsList[i] != 'SearchableText')
+                    	value = encodeURI(value);
+                    formData = formData + paramsList[i] + '=' +  value;
                 }
                 else if (typeof value=='object') {
                     for ( var j = 0; j < value.length; j++ ) {
@@ -558,7 +572,7 @@ Browser.createFolder = function() {
     jQuery('.statusBar > div', Browser.window).hide().filter('#msg-loading').show();
     createFolderUrl = Browser.url + '/@@finder_create_folder';
     var folderForm = jQuery('#create-new-folder');
-    var formData = jQuery('input:not([type=button]), textarea', folderForm).serialize();
+    var formData = decodeURIComponent(jQuery('input:not([type=button]), textarea', folderForm).serialize());
     jQuery.ajax({
         type: 'GET',
         url: createFolderUrl,
@@ -628,7 +642,7 @@ Browser.search = function() {
     // var SearchableText = jQuery('#SearchableText').val();
     var searchform = jQuery('#finderSearchForm');
     Browser.formData = jQuery('#nextQuery').val();
-    var formData = jQuery('input:not([type=submit]), textarea, select', searchform).serialize() + '&' + Browser.formData;
+    var formData = decodeURIComponent(jQuery('input:not([type=submit]), textarea, select', searchform).serialize()) + '&' + Browser.formData;
     var browsedpath = jQuery('#browsedpath').val();
     Browser.update(browsedpath, formData);
 };
