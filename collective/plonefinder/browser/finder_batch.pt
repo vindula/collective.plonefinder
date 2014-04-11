@@ -14,7 +14,7 @@
          tal:define="request request|context/request|container/request|nothing;
                      batch batch|nothing;
                      template_id template_id|template/getId;
-                     mq python:modules['ZTUtils'].make_query;
+                     mq python:view.make_query;
                      url batch_base_url | string:${context/absolute_url}/${template_id};
                      currentpage batch/pagenumber;">
 
@@ -69,10 +69,11 @@
         </div>
 
         <div id="listing-pages">
+            
           <!-- Link to first -->
           <span tal:condition="python: 1 not in batch.navlist">
             <a href=""
-               tal:attributes="href python: '%s?%s' % (url, batch.pageurl(request.form,1));">1</a>
+               tal:attributes="href python: '%s?%s' % (url, mq( request.form, {batch.b_start_str:'0'} ));">1</a>
             <span tal:condition="python: 2 not in (batch.prevlist or batch.leapback)"
                   tal:omit-tag="">
               &hellip;
@@ -87,7 +88,7 @@
                tal:define="page python:linklist[0];
                            query python:linklist[1];"
                tal:content="page"
-               tal:attributes="href python: '%s?%s' % (url,query)" >
+               tal:attributes="href python: '%s?%s' % (url,mq( request.form, {batch.b_start_str:page-1} ))" >
             </a>
             &hellip;
           </span>
@@ -100,7 +101,7 @@
                tal:define="page python:linklist[0];
                            query python:linklist[1];"
                tal:content="page"
-               tal:attributes="href python: '%s?%s' % (url,query)" >
+               tal:attributes="href python: '%s?%s' % (url,mq( request.form, {batch.b_start_str:page-1} ))" >
             </a>
           </span>
 
@@ -116,7 +117,7 @@
                tal:define="page python:linklist[0];
                            query python:linklist[1];"
                tal:content="page"
-               tal:attributes="href python: '%s?%s' % (url,query)" >
+               tal:attributes="href python: '%s?%s' % (url,mq( request.form, {batch.b_start_str:page-1} ))" >
             </a>
           </span>
 
@@ -129,7 +130,7 @@
                tal:define="page python:linklist[0];
                            query python:linklist[1];"
                tal:content="page"
-               tal:attributes="href python: '%s?%s' % (url,query)" >
+               tal:attributes="href python: '%s?%s' % (url,mq( request.form, {batch.b_start_str:page-1} ))" >
             </a>
           </span>
 
@@ -140,7 +141,7 @@
               &hellip;
             </span>
             <a href=""
-               tal:attributes="href python: '%s?%s' % (url,batch.pageurl(request.form,batch.numpages));"
+               tal:attributes="href python: '%s?%s' % (url,mq( request.form, {batch.b_start_str: batch.numpages-1}));"
                tal:content="batch/numpages">3457</a>
           </span>
 

@@ -2,7 +2,10 @@
 # $Id: finder.py 240678 2011-06-08 19:46:09Z msmith64 $
 """Finder pop up control"""
 
+import urllib
+
 from ZTUtils import make_query
+from ZTUtils.Zope import complex_marshal
 from zope.interface import implements
 
 from Products.Five import BrowserView
@@ -294,6 +297,33 @@ class Finder(BrowserView):
         self.cleanrequest = self.cleanRequest()
 
         return self.template()
+    
+    #Edit make_query
+    def make_query(self, *args, **kwargs):
+        '''Construct a URL query string, with marshalling markup.
+    
+        If there are positional arguments, they must be dictionaries.
+        They are combined with the dictionary of keyword arguments to form
+        a dictionary of query names and values.
+    
+        Query names (the keys) must be strings.  Values may be strings,
+        integers, floats, or DateTimes, and they may also be lists or
+        namespaces containing these types.  Names and string values
+        should not be URL-quoted.  All arguments are marshalled with
+        complex_marshal().
+        '''
+        d = {}
+        for arg in args:
+            d.update(arg)
+        d.update(kwargs)
+    
+        uq = urllib.quote
+        qlist = complex_marshal(d.items())
+        for i in range(len(qlist)):
+            k, m, v = qlist[i]
+            qlist[i] = '%s%s=%s' % (uq(k), m, uq(str(v).encode('raw_unicode_escape')))
+    
+        return '&'.join(qlist)
 
 
     def setScopeInfos(self, context, request, showbreadcrumbs):
@@ -378,6 +408,7 @@ class Finder(BrowserView):
             if self.searchsubmit:
                 # TODO: use a dynamic form with different possible searchform fields
                 q = request.get('SearchableText', '')
+                q = q.encode('raw_unicode_escape').decode('utf-8')
                 if q:
                     for char in '?-+*':
                         q = q.replace(char, ' ')

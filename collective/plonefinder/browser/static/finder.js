@@ -572,7 +572,7 @@ Browser.createFolder = function() {
     jQuery('.statusBar > div', Browser.window).hide().filter('#msg-loading').show();
     createFolderUrl = Browser.url + '/@@finder_create_folder';
     var folderForm = jQuery('#create-new-folder');
-    var formData = decodeURIComponent(jQuery('input:not([type=button]), textarea', folderForm).serialize());
+    var formData = jQuery('input:not([type=button]), textarea', folderForm).serialize();
     jQuery.ajax({
         type: 'GET',
         url: createFolderUrl,
@@ -642,7 +642,7 @@ Browser.search = function() {
     // var SearchableText = jQuery('#SearchableText').val();
     var searchform = jQuery('#finderSearchForm');
     Browser.formData = jQuery('#nextQuery').val();
-    var formData = decodeURIComponent(jQuery('input:not([type=submit]), textarea, select', searchform).serialize()) + '&' + Browser.formData;
+    var formData = jQuery('input:not([type=submit]), textarea, select', searchform).serialize() + '&' + Browser.formData;
     var browsedpath = jQuery('#browsedpath').val();
     Browser.update(browsedpath, formData);
 };
