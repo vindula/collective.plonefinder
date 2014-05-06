@@ -457,6 +457,10 @@ Browser.update = function(browsedpath, formData, b_start, sort_on, sort_order, n
                 formData = compileData('SearchableText', jQuery('#previousSearch').val(), formData);
                 formData = compileData('searchsubmit:int', '1', formData);
             }
+            if (jQuery('#previousFolderSearch').length) {
+                formData = compileData('textSearchFolder', jQuery('#previousFolderSearch').val(), formData);
+                formData = compileData('searchfoldersubmit:int', '1', formData);
+            }
         }
         if (typeof sort_order != "undefined") formData = compileData('sort_order', sort_order, formData);
         formData = compileData('field_name', Browser.field_name, formData);
@@ -643,6 +647,15 @@ Browser.search = function() {
     var searchform = jQuery('#finderSearchForm');
     Browser.formData = jQuery('#nextQuery').val();
     var formData = jQuery('input:not([type=submit]), textarea, select', searchform).serialize() + '&' + Browser.formData;
+    var browsedpath = jQuery('#browsedpath').val();
+    Browser.update(browsedpath, formData);
+};
+
+Browser.searchFolder = function() {
+    // var SearchableText = jQuery('#SearchableText').val();
+    var searchfolderform = jQuery('#finderSearchFolder');
+    Browser.formData = jQuery('#nextQuery').val();
+    var formData = jQuery('input:not([type=submit]), textarea, select', searchfolderform).serialize()+ '&' + Browser.formData;
     var browsedpath = jQuery('#browsedpath').val();
     Browser.update(browsedpath, formData);
 };

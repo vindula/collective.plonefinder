@@ -8,6 +8,8 @@
                          nextQuery view/cleanQuery;
                          SearchableText request/SearchableText | string:;
                          SearchableText python:SearchableText.encode('raw_unicode_escape').decode('utf-8');
+                         textSearchFolder request/textSearchFolder | string:;
+                         textSearchFolder python:textSearchFolder.encode('raw_unicode_escape').decode('utf-8');
                          onlybody request/form/onlybody | python:False;
                          b_size python:20;
                          b_size request/b_size | b_size;
@@ -60,6 +62,11 @@
                  type="hidden"
                  tal:condition="SearchableText"
                  tal:attributes="value SearchableText" />
+          <input id="previousFolderSearch"
+                 name="previousFolderSearch"
+                 type="hidden"
+                 tal:condition="textSearchFolder"
+                 tal:attributes="value textSearchFolder" />
           <div id="plone-browser-menu">
             <a class="closeWindow"
                i18n:attributes="title label_close_window"
@@ -190,6 +197,30 @@
                      tal:condition="view/browse">
                 <div id="plone-browser-navigation"
                      class="finder_panel">
+                  <div class="searchFolders">
+                     <form action="" id="finderSearchFolder">
+                        <input type="hidden"
+                               name="searchfoldersubmit:int"
+                               value="1" />
+                        <label>Buscar Pastas ou UOs</label>
+                        <input name="textSearchFolder"
+                               id="textSearchFolder"
+                               type="text"
+                               value=""
+                               size="15"
+                               title="Search Site"
+                               tabindex="0"
+                               tal:attributes="value textSearchFolder" />
+                        <input class="searchBrowserButton"
+                               type="submit"
+                               value="SearchFolder"
+                               name="searchfoldersubmit"
+                               i18n:domain="plone"
+                               i18n:attributes="value label_search;"
+                               href="javascript: void(0);"
+                               tal:attributes="onclick string:Browser.searchFolder();; return false;" />
+                     </form>
+                  </div>
                   <div class="listContainer folder"
                        tal:define="path view/browsedpath;
                                    title view/scopetitle">
@@ -239,7 +270,7 @@
                 <div id="plone-browser-body"
                      class="finder_panel">
 
-                  <tal:block condition="python: view.browse and not view.searchsubmit">
+                  <tal:block condition="python: view.browse and not view.searchsubmit and not view.searchfoldersubmit">
                       <tal:folders repeat="f folders">
                           <div tal:attributes="class string: ${typecss}Container folder;">
                                <a href="javascript: void(0);"
@@ -258,7 +289,7 @@
                       </tal:folders>
                   </tal:block>
                   
-                  <tal:block condition="view/searchsubmit">
+                  <tal:block condition="python: view.searchsubmit or view.searchfoldersubmit">
                       <tal:folders repeat="f results">
                           <div tal:condition="f/is_folderish"
                                tal:attributes="class string: ${typecss}Container folder;">
@@ -277,88 +308,91 @@
                           </div>
                       </tal:folders>
                   </tal:block>
-
-                  <div tal:condition="python: batch"
-                       class="listContainer" id="sortheaders"
-                       tal:attributes="style python: typeview=='image' and 'display:none' or nothing;
-                                       class python: sort_order=='reverse' and 'listContainer reverseheaders' or 'listContainer'">
-                    <div class="sorton sortontype">
-                       <a href="javascript: void(0);"
-                          tal:attributes="onclick string:Browser.sorton('portal_type', '$sort_inverse');; return false;
-                                          class python: sort_on=='portal_type' and 'selected' or nothing"></a>
-                    </div>
-                    <div class="sorton sortontitle">
-                       <a href="javascript: void(0);"
-                          tal:attributes="onclick string:Browser.sorton('sortable_title', '$sort_inverse');; return false;
-                                          class python: sort_on=='sortable_title' and 'selected' or nothing"></a>
-                    </div>
-                    <div class="sorton sortonsize">
-                       <a href="javascript: void(0);"
-                          tal:attributes="onclick string:Browser.sorton('real_size', '$sort_inverse');; return false;
-                                          class python: sort_on=='real_size' and 'selected' or nothing"></a>
-                    </div>
-                    <div class="sorton sortoncreated">
-                       <a href="javascript: void(0);"
-                          tal:attributes="onclick string:Browser.sorton('created', '$sort_inverse');; return false;
-                                          class python: sort_on=='created' and 'selected' or nothing"></a>
-                    </div>
-                  </div>
-
-                  <tal:results repeat="r batch">
-                    <div tal:attributes="class string:${typecss}Container ${r/orientation_class};">
-                      <a href="javascript: void(0);"
-                         tal:define="blacklisted r/blacklisted;
-                                     blclass python:blacklisted and ' blacklisted' or '';
-                                     is_image r/is_image;
-                                     selectPreviewImageString python:(is_image and allowimagesizeselection) and 'true' or 'false';"
-                         tal:attributes="class   string: ${r/container_class}${blclass};
-                                         title   string:select ${r/type};
-                                         onclick string:Browser.selectItem('${r/uid}', '${r/jstitle}', $selectPreviewImageString);; return false;" >
-                        <img tal:condition="is_image"
-                             tal:attributes="src r/thumb; style r/style" />
-                        <div tal:condition="not: is_image"
-                             tal:attributes="class r/iconclass; style r/style">&nbsp;</div>
-                        <div tal:content="r/title"
-                             tal:attributes="class string:title ${r/state_class}">sample Portrait 1</div>
-                        <div class="legend lsize" tal:content="r/size">54 kB</div>
-                        <div class="legend lcreated"
-                             tal:define="created r/created"
-                             tal:content="python:toLocalizedTime(created,long_format=1)">2010/01/01</div>
-                        <div class="visualClear"><!-- --></div>
-                      </a>
-
-                      <div class="relContainer" tal:condition="r/is_image">
-                        <a class="loupe thickbox"
-                           tal:attributes="href r/preview_url;
-                                           title string:${r/title} (preview);"
-                           i18n:attributes="title">&nbsp;</a>
-                      </div>
-                      <div tal:define="actions_menu r/actions_menu"
-                           class="actionsMenusRelContainer" tal:condition="actions_menu/items">
-                        <a class="actionMenusButton"
-                           href="#">&nbsp;</a>
-                        <div class="finderActionMenuContainer"
-                             tal:condition="actions_menu/choose_image_size|nothing">
-                          <ul class="finderActionMenu imageSizeActionMenu">
-                            <li class="finderActionMenuHeader"
-                                tal:content="actions_menu/choose_image_size/label">
-                                Choose image size
-                            </li>
-                            <li class="finderActionMenuItem imageSizeActionMenuItem"
-                                tal:repeat="action actions_menu/choose_image_size/actions">
-                                <a tal:content="python:action[3]"
-                                   href="#"
-                                   tal:define="thumb_size python:action[0];
-                                               thumb_size_url_extension python:action[4]"
-                                   tal:attributes="onclick string:Browser.selectItem('${r/uid}${thumb_size_url_extension}', '${r/jstitle}');; return false;">
-                                   Thumb : 128px*128px
-                                </a>
-                            </li>
-                          </ul>
+                  
+                  <tal:cond condition="not: view/searchfoldersubmit">
+                      <div tal:condition="python: batch"
+                           class="listContainer" id="sortheaders"
+                           tal:attributes="style python: typeview=='image' and 'display:none' or nothing;
+                                           class python: sort_order=='reverse' and 'listContainer reverseheaders' or 'listContainer'">
+                        <div class="sorton sortontype">
+                           <a href="javascript: void(0);"
+                              tal:attributes="onclick string:Browser.sorton('portal_type', '$sort_inverse');; return false;
+                                              class python: sort_on=='portal_type' and 'selected' or nothing"></a>
+                        </div>
+                        <div class="sorton sortontitle">
+                           <a href="javascript: void(0);"
+                              tal:attributes="onclick string:Browser.sorton('sortable_title', '$sort_inverse');; return false;
+                                              class python: sort_on=='sortable_title' and 'selected' or nothing"></a>
+                        </div>
+                        <div class="sorton sortonsize">
+                           <a href="javascript: void(0);"
+                              tal:attributes="onclick string:Browser.sorton('real_size', '$sort_inverse');; return false;
+                                              class python: sort_on=='real_size' and 'selected' or nothing"></a>
+                        </div>
+                        <div class="sorton sortoncreated">
+                           <a href="javascript: void(0);"
+                              tal:attributes="onclick string:Browser.sorton('created', '$sort_inverse');; return false;
+                                              class python: sort_on=='created' and 'selected' or nothing"></a>
                         </div>
                       </div>
-                    </div>
-                  </tal:results>
+                  
+                  
+                      <tal:results repeat="r batch">
+                        <div tal:attributes="class string:${typecss}Container ${r/orientation_class};">
+                          <a href="javascript: void(0);"
+                             tal:define="blacklisted r/blacklisted;
+                                         blclass python:blacklisted and ' blacklisted' or '';
+                                         is_image r/is_image;
+                                         selectPreviewImageString python:(is_image and allowimagesizeselection) and 'true' or 'false';"
+                             tal:attributes="class   string: ${r/container_class}${blclass};
+                                             title   string:select ${r/type};
+                                             onclick string:Browser.selectItem('${r/uid}', '${r/jstitle}', $selectPreviewImageString);; return false;" >
+                            <img tal:condition="is_image"
+                                 tal:attributes="src r/thumb; style r/style" />
+                            <div tal:condition="not: is_image"
+                                 tal:attributes="class r/iconclass; style r/style">&nbsp;</div>
+                            <div tal:content="r/title"
+                                 tal:attributes="class string:title ${r/state_class}">sample Portrait 1</div>
+                            <div class="legend lsize" tal:content="r/size">54 kB</div>
+                            <div class="legend lcreated"
+                                 tal:define="created r/created"
+                                 tal:content="python:toLocalizedTime(created,long_format=1)">2010/01/01</div>
+                            <div class="visualClear"><!-- --></div>
+                          </a>
+    
+                          <div class="relContainer" tal:condition="r/is_image">
+                            <a class="loupe thickbox"
+                               tal:attributes="href r/preview_url;
+                                               title string:${r/title} (preview);"
+                               i18n:attributes="title">&nbsp;</a>
+                          </div>
+                          <div tal:define="actions_menu r/actions_menu"
+                               class="actionsMenusRelContainer" tal:condition="actions_menu/items">
+                            <a class="actionMenusButton"
+                               href="#">&nbsp;</a>
+                            <div class="finderActionMenuContainer"
+                                 tal:condition="actions_menu/choose_image_size|nothing">
+                              <ul class="finderActionMenu imageSizeActionMenu">
+                                <li class="finderActionMenuHeader"
+                                    tal:content="actions_menu/choose_image_size/label">
+                                    Choose image size
+                                </li>
+                                <li class="finderActionMenuItem imageSizeActionMenuItem"
+                                    tal:repeat="action actions_menu/choose_image_size/actions">
+                                    <a tal:content="python:action[3]"
+                                       href="#"
+                                       tal:define="thumb_size python:action[0];
+                                                   thumb_size_url_extension python:action[4]"
+                                       tal:attributes="onclick string:Browser.selectItem('${r/uid}${thumb_size_url_extension}', '${r/jstitle}');; return false;">
+                                       Thumb : 128px*128px
+                                    </a>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </tal:results>
+                  </tal:cond>
 
                   <tal:noresults condition="python: SearchableText and not results"
                                  i18n:domain="plone">

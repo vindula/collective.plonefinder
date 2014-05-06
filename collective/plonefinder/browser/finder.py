@@ -74,7 +74,7 @@ def finderTopicsQueryCatalog(scope, catalog,  **kw):
         query.update(kw)
         return catalog(**query)
 
-FORM_PARAMS = ('SearchableText',)
+FORM_PARAMS = ('SearchableText', 'textSearchFolder')
 
 
 class Finder(BrowserView):
@@ -168,6 +168,8 @@ class Finder(BrowserView):
         self.jsaddons = ''
         # Change this property to define your own css
         self.cssaddons = ''
+        #: True to display search folders results
+        self.searchfoldersubmit = False
 
 
     def __call__(self):
@@ -186,7 +188,7 @@ class Finder(BrowserView):
             'typeview', 'displaywithoutquery', 'query', 'imagestypes',
             'filestypes', 'selectiontype', 'allowimagesizeselection', 'fieldid',
             'fieldname', 'fieldtype', 'ispopup', 'showblacklisted',
-            'searchsubmit', 'allowupload', 'allowaddfolder'
+            'searchsubmit', 'allowupload', 'allowaddfolder', 'searchfoldersubmit'
             ):
             setattr(self, name, request.get(name, getattr(self, name)))
 
@@ -244,8 +246,12 @@ class Finder(BrowserView):
                 session.set('blacklist', [])
             else:
                 session.set('blacklist', self.blacklist)
-
-        firstpassresults = self.finderResults()
+        
+        if self.searchfoldersubmit:
+            firstpassresults = self.finderFoldersSearch()
+        else:
+            firstpassresults = self.finderResults()
+            
         if self.sort_request and not self.sort_withcatalog:
             firstpassresults.sort(key=lambda k: k[self.sort_on])
             if self.sort_order == 'reverse':
@@ -261,7 +267,7 @@ class Finder(BrowserView):
                 elif self.showblacklisted:
                     r['blacklisted'] = True
                     results.append(r)
-
+        
         self.results = results
         self.folders = []
         self.rootfolders = []
@@ -663,7 +669,7 @@ class Finder(BrowserView):
         request = self.request
         ignored = ('blacklist', 'addtoblacklist', 'removefromblacklist', 'searchsubmit',
                    'newsession', 'emptyblacklist', 'b_start', 'finder_sort_on',
-                   'sort_order')
+                   'sort_order', 'searchfoldersubmit')
         dictRequest = {}
         for param, value in request.form.items():
             if (value is not None and
@@ -678,4 +684,69 @@ class Finder(BrowserView):
         """Make a query_string with clean Request
         """
         return make_query(self.cleanrequest)
+    
+    def finderFoldersSearch(self):
+        cat = self.data['catalog']
+        query = {}
+        path = {}
+        path['query'] =  self.browsedpath
+        query['path'] = path
+        sort_index = self.sort_on
+        query['portal_type'] = ['VindulaFolder', 'Folder', 'OrganizationalStructure']
+        
+        results = []
+        request = self.request
+        q = request.get('textSearchFolder', '')
+        q = q.encode('raw_unicode_escape').decode('utf-8')
+        if q:
+            for char in '?-+*':
+                q = q.replace(char, ' ')
+            r=q.split()
+            r = " AND ".join(r)
+            searchterms = _quote_bad_chars(r)+'*'
 
+            query['SearchableText'] = searchterms
+        
+        brains = cat(**query)
+        
+        for b in brains:
+            title_or_id = b.pretty_title_or_id()
+            r = {
+                'uid': b.UID,
+                'url': b.getURL(),
+                'path': b.getPath(),
+                'title': title_or_id,
+                'jstitle': title_or_id.replace("\x27", "\x5C\x27"),
+                'description':b.Description,
+                'state_class': 'state-%s' % b.review_state,
+                'is_folderish': b.is_folderish or False,
+                'size': b.getObjSize,
+                'type': b.portal_type,
+                'blacklisted': False,
+                'created': b.created,
+                'actions_menu': {}
+                }
+            
+            orientation = 'small'
+            r['style'] = ''
+            if b.portal_type in self.filestypes:
+                o = b.getObject()
+                icon_base = o.getIcon()
+                if icon_base:
+                    r['style'] = 'background-image: url(./%s)' % icon_base
+            r['iconclass'] = 'contenttype-%s divicon' % b.portal_type.lower().replace(' ','-')
+
+            thumb = icon = None
+            r['is_image'] = False
+            r['container_class'] = 'fileContainer'
+            r['orientation_class'] = '%s_icon' % orientation
+            r['thumb'] = icon
+
+            if r['size']:
+                r['real_size'] = float(r['size'].split(' ')[0])
+            else:
+                r['real_size'] = 0
+
+            results.append(r)
+            
+        return results
